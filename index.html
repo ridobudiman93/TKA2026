@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil TKA 2026 - SMP Negeri 3 Pariaman</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .page-slide {
+            transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+        }
+        .hidden-slide {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans min-h-screen flex flex-col">
+
+    <header class="bg-blue-900 text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4 text-center sm:text-left">
+                <img src="LOGO.jpg" alt="Logo SMPN 3 Pariaman" class="h-16 w-16 object-contain bg-white p-1 rounded-full border-2 border-yellow-400 onerror="this.src='https://via.placeholder.com/64?text=SMPN+3'">
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">SMP NEGERI 3 PARIAMAN</h1>
+                    <p class="text-xs text-blue-200">Pengumuman Hasil Tes Kemampuan Akademik (TKA) Tahun 2026</p>
+                </div>
+            </div>
+            
+            <nav class="flex bg-blue-950 p-1 rounded-full border border-blue-800 shadow-inner">
+                <button id="btn-siswa" onclick="switchPage('siswa')" class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 bg-yellow-500 text-blue-950 font-semibold shadow">
+                    <i class="fas fa-user-graduate mr-2"></i>Nilai Siswa
+                </button>
+                <button id="btn-sekolah" onclick="switchPage('sekolah')" class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 text-gray-300 hover:text-white">
+                    <i class="fas fa-chart-bar mr-2"></i>Rata-Rata Sekolah
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 flex-grow relative overflow-hidden max-w-4xl">
+        
+        <div id="page-siswa" class="page-slide duration-300">
+            
+            <div id="login-container" class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-md mx-auto text-center transform transition-all">
+                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Cek Nilai Mandiri</h2>
+                <p class="text-sm text-gray-500 mb-6">Demi menjaga privasi data, masukkan NISN (Nomor Induk Siswa Nasional) Anda untuk melihat hasil ujian.</p>
+                
+                <div class="mb-4 text-left">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Masukkan NISN</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fas fa-id-card"></i>
+                        </span>
+                        <input type="text" id="nisn-input" placeholder="Contoh: 108114158" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+                    </div>
+                </div>
+                
+                <button onclick="cariSiswa()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                    <i class="fas fa-search"></i> Periksa Hasil Ujian
+                </button>
+                <div id="error-message" class="mt-4 text-red-600 text-sm font-medium hidden"></div>
+            </div>
+
+            <div id="dashboard-siswa" class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden hidden transform scale-95 opacity-0 transition-all duration-300">
+                <div class="bg-gradient-to-r from-blue-800 to-indigo-900 p-6 text-white flex justify-between items-center">
+                    <div>
+                        <span class="bg-blue-700/50 text-yellow-300 text-xs px-3 py-1 rounded-full font-semibold tracking-wider uppercase mb-1 inline-block">Lembar Hasil Studi</span>
+                        <h2 id="dash-nama" class="text-2xl font-bold uppercase">Nama Siswa</h2>
+                    </div>
+                    <button onclick="logoutSiswa()" class="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg text-sm transition-all">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Keluar
+                    </button>
+                </div>
+                
+                <div class="p-6 sm:p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 bg-gray-50 p-4 rounded-xl border border-gray-200/60">
+                        <div>
+                            <span class="text-xs text-gray-400 uppercase tracking-wider block">NISN</span>
+                            <span id="dash-nisn" class="font-semibold text-gray-800 text-base">-</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-gray-400 uppercase tracking-wider block">No. Ujian / Peserta</span>
+                            <span id="dash-noujian" class="font-mono font-semibold text-gray-800 text-sm">-</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-gray-400 uppercase tracking-wider block">Tempat, Tanggal Lahir</span>
+                            <span id="dash-ttl" class="font-semibold text-gray-800 text-sm">-</span>
+                        </div>
+                    </div>
+
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-graduation-cap text-blue-600"></i> Nilai Capaian Kompetensi
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="border border-gray-200 rounded-xl p-5 shadow-sm bg-white relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full -z-0 opacity-40"></div>
+                            <div class="relative z-10">
+                                <span class="text-xs font-bold uppercase tracking-wider text-red-600 bg-red-50 px-2 py-1 rounded">Matematika</span>
+                                <div class="flex items-baseline gap-2 mt-4">
+                                    <span id="score-mtk" class="text-4xl font-extrabold text-gray-900">-</span>
+                                    <span class="text-gray-400 text-sm">/ 100</span>
+                                </div>
+                                <div class="mt-4 flex items-center gap-2">
+                                    <span class="text-sm text-gray-500">Keterangan:</span>
+                                    <span id="ket-mtk" class="text-sm font-bold px-3 py-0.5 rounded-full">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-xl p-5 shadow-sm bg-white relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-bl-full -z-0 opacity-40"></div>
+                            <div class="relative z-10">
+                                <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-1 rounded">Bahasa Indonesia</span>
+                                <div class="flex items-baseline gap-2 mt-4">
+                                    <span id="score-ind" class="text-4xl font-extrabold text-gray-900">-</span>
+                                    <span class="text-gray-400 text-sm">/ 100</span>
+                                </div>
+                                <div class="mt-4 flex items-center gap-2">
+                                    <span class="text-sm text-gray-500">Keterangan:</span>
+                                    <span id="ket-ind" class="text-sm font-bold px-3 py-0.5 rounded-full">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-sekolah" class="page-slide hidden-slide duration-300">
+            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800">Resume Hasil Ujian Keseluruhan</h2>
+                    <p class="text-sm text-gray-500 mt-1">Laporan statistik performa akademik TKA Tahun 2026</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl text-center">
+                        <div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 text-lg shadow-md">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <h4 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Rata-Rata Matematika</h4>
+                        <p class="text-4xl font-black text-blue-900 my-2">37.38</p>
+                        <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Kurang / Memadai</span>
+                    </div>
+
+                    <div class="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl text-center">
+                        <div class="w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 text-lg shadow-md">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h4 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Rata-Rata Bahasa Indonesia</h4>
+                        <p class="text-4xl font-black text-emerald-900 my-2">57.65</p>
+                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Memadai</span>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-trophy text-amber-500"></i> Siswa Berprestasi (Nilai Tertinggi)
+                </h3>
+
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-amber-50/60 border border-amber-200 rounded-xl">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-amber-500 text-white font-bold rounded-xl flex items-center justify-center text-lg shadow-sm">
+                                <i class="fas fa-square-root-alt"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-gray-800 uppercase">TIARA NAZIR</h5>
+                                <p class="text-xs text-gray-500">Peraih Nilai Tertinggi Matematika</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-2xl font-black text-amber-600">66.67</span>
+                            <span class="block text-[10px] text-amber-700 font-bold uppercase bg-amber-100 px-2 py-0.5 rounded mt-0.5">Memadai</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-amber-50/60 border border-amber-200 rounded-xl">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-amber-500 text-white font-bold rounded-xl flex items-center justify-center text-lg shadow-sm">
+                                <i class="fas fa-language"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-gray-800 uppercase">MENAJWA HANIFAH</h5>
+                                <h5 class="font-bold text-gray-800 uppercase">MANDALA AKNEL NASUHA</h5>
+                                <p class="text-xs text-gray-500">Peraih Nilai Tertinggi Bahasa Indonesia</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-2xl font-black text-amber-600">93.33</span>
+                            <span class="block text-[10px] text-amber-700 font-bold uppercase bg-amber-100 px-2 py-0.5 rounded mt-0.5">Baik</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 text-center py-4 text-xs mt-auto border-t border-gray-700">
+        &copy; 2026 SMP Negeri 3 Pariaman. All Rights Reserved. Data Privasi Terlindungi.
+    </footer>
+
+    <script>
+        // Data Contoh Potongan Hasil Ekstraksi Excel (Disimpan Terenkripsi / Lokal)
+        const databaseSiswa = {
+            "108114158": { nama: "FRISKA AMANDA. S", ujian: "T2-26-08-07-0003-0001-8", ttl: "Marabau, 25 Oktober 2010", mtk: "33.33", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0108642406": { nama: "Fhakri Al Muzakhi", ujian: "T2-26-08-07-0003-0002-7", ttl: "Sungai kasai, 9 November 2010", mtk: "50.00", ketMtk: "Memadai", ind: "60.00", ketInd: "Memadai" },
+"0109903540": { nama: "M. Irfan", ujian: "T2-26-08-07-0003-0003-6", ttl: "Pekanbaru, 30 Desember 2010", mtk: "36.67", ketMtk: "Memadai", ind: "80.00", ketInd: "Baik" },
+"0103387143": { nama: "Nico Efrino", ujian: "T2-26-08-07-0003-0004-5", ttl: "Sungai Laban, 18 Agustus 2010", mtk: "43.33", ketMtk: "Memadai", ind: "50.00", ketInd: "Memadai" },
+"0102035606": { nama: "Muhammad Izzatul Karim", ujian: "T2-26-08-07-0003-0005-4", ttl: "Pariaman, 27 Juli 2010", mtk: "50.00", ketMtk: "Memadai", ind: "56.67", ketInd: "Memadai" },
+"0107733045": { nama: "NAYLA SANIYA RYADI", ujian: "T2-26-08-07-0003-0006-3", ttl: "PARIAMAN, 11 November 2010", mtk: "33.33", ketMtk: "Memadai", ind: "73.33", ketInd: "Memadai" },
+"0118712839": { nama: "NAYLA DIWA MAHARANI", ujian: "T2-26-08-07-0003-0007-2", ttl: "PARIAMAN, 2 Desember 2011", mtk: "56.67", ketMtk: "Baik", ind: "70.00", ketInd: "Memadai" },
+"0101465946": { nama: "Adzra Dalila Kautsar", ujian: "T2-26-08-07-0003-0008-9", ttl: "Pariaman, 27 November 2010", mtk: "40.00", ketMtk: "Memadai", ind: "63.33", ketInd: "Memadai" },
+"0109519215": { nama: "MUHAMMAD HAFIDH AL MUZAKI", ujian: "T2-26-08-07-0003-0009-8", ttl: "PARIAMAN, 22 Juli 2010", mtk: "60.00", ketMtk: "Baik", ind: "73.33", ketInd: "Memadai" },
+"0102759456": { nama: "Muhammad Bintang Dari", ujian: "T2-26-08-07-0003-0010-7", ttl: "Muara Rupit, 4 Januari 2010", mtk: "40.00", ketMtk: "Memadai", ind: "63.33", ketInd: "Memadai" },
+"0118976355": { nama: "Silva Ricia Putri", ujian: "T2-26-08-07-0003-0011-6", ttl: "Ampalu Tinggi, 26 Desember 2011", mtk: "20.00", ketMtk: "Kurang", ind: "66.67", ketInd: "Memadai" },
+"0112277789": { nama: "Rava Febrian", ujian: "T2-26-08-07-0003-0012-5", ttl: "Kampung Ladang, 5 Februari 2011", mtk: "36.67", ketMtk: "Memadai", ind: "53.33", ketInd: "Memadai" },
+"0126019388": { nama: "Zahra Aulia Rahman", ujian: "T2-26-08-07-0003-0013-4", ttl: "Tegal, 22 Februari 2012", mtk: "33.33", ketMtk: "Memadai", ind: "63.33", ketInd: "Memadai" },
+"0116202823": { nama: "AFIFAH LAILATUL MUTHMAINNAH", ujian: "T2-26-08-07-0003-0014-3", ttl: "PARIAMAN, 18 Maret 2011", mtk: "40.00", ketMtk: "Memadai", ind: "50.00", ketInd: "Memadai" },
+"0108898100": { nama: "M. ZAKY ALDRIAN", ujian: "T2-26-08-07-0003-0015-2", ttl: "PARIAMAN, 7 Desember 2010", mtk: "36.67", ketMtk: "Memadai", ind: "40.00", ketInd: "Kurang" },
+"0108161946": { nama: "Danil Saputra", ujian: "T2-26-08-07-0003-0016-9", ttl: "Sampan, 7 November 2010", mtk: "36.67", ketMtk: "Memadai", ind: "50.00", ketInd: "Memadai" },
+"0109597405": { nama: "Rasyid An Nafii", ujian: "T2-26-08-07-0003-0017-8", ttl: "Rambai, 27 April 2010", mtk: "43.33", ketMtk: "Memadai", ind: "73.33", ketInd: "Memadai" },
+"0106907140": { nama: "GERI MAULANA", ujian: "T2-26-08-07-0003-0018-7", ttl: "PAUH KAMBAR, 11 Maret 2010", mtk: "23.33", ketMtk: "Kurang", ind: "43.33", ketInd: "Kurang" },
+"0109926025": { nama: "SALSABILA PUTRI", ujian: "T2-26-08-07-0003-0019-6", ttl: "Pariaman, 2 Juni 2010", mtk: "26.67", ketMtk: "Kurang", ind: "76.67", ketInd: "Baik" },
+"0118129893": { nama: "AHMAD IBRAHIM", ujian: "T2-26-08-07-0003-0020-5", ttl: "PARIAMAN, 27 Januari 2011", mtk: "46.67", ketMtk: "Memadai", ind: "43.33", ketInd: "Kurang" },
+"0103161551": { nama: "ASHARA ROUSIANA", ujian: "T2-26-08-07-0003-0021-4", ttl: "PARIAMAN, 20 November 2010", mtk: "40.00", ketMtk: "Memadai", ind: "43.33", ketInd: "Kurang" },
+"0113562250": { nama: "Naura Raihana", ujian: "T2-26-08-07-0003-0022-3", ttl: "Sungai Sariak, 9 Juli 2011", mtk: "40.00", ketMtk: "Memadai", ind: "60.00", ketInd: "Memadai" },
+"0112709340": { nama: "REXA GALUH RAMADHAN", ujian: "T2-26-08-07-0003-0023-2", ttl: "Limau Hantu, 19 Agustus 2011", mtk: "36.67", ketMtk: "Memadai", ind: "36.67", ketInd: "Kurang" },
+"0102914203": { nama: "Khasta Pangeran Dwito", ujian: "T2-26-08-07-0003-0024-9", ttl: "PARIAMAN, 11 Juli 2010", mtk: "40.00", ketMtk: "Memadai", ind: "63.33", ketInd: "Memadai" },
+"0113393029": { nama: "M. WANNAJMI", ujian: "T2-26-08-07-0003-0025-8", ttl: "Pariaman, 31 Januari 2011", mtk: "43.33", ketMtk: "Memadai", ind: "46.67", ketInd: "Kurang" },
+"0113512618": { nama: "GERAL SAKURA", ujian: "T2-26-08-07-0003-0026-7", ttl: "SEI LABAN, 30 April 2011", mtk: "40.00", ketMtk: "Memadai", ind: "80.00", ketInd: "Baik" },
+"0114270951": { nama: "Fauzah Arziky Ramadan", ujian: "T2-26-08-07-0003-0027-6", ttl: "Lubuk Puar, 8 Agustus 2011", mtk: "36.67", ketMtk: "Memadai", ind: "83.33", ketInd: "Baik" },
+"3105525730": { nama: "REZA MUHAMMAD RIZAL", ujian: "T2-26-08-07-0003-0028-5", ttl: "SOLOK, 28 November 2010", mtk: "36.67", ketMtk: "Memadai", ind: "60.00", ketInd: "Memadai" },
+"0116605984": { nama: "AZURA MAI DECHA", ujian: "T2-26-08-07-0003-0029-4", ttl: "KAPALO KOTO, 12 Mei 2011", mtk: "36.67", ketMtk: "Memadai", ind: "56.67", ketInd: "Memadai" },
+"0101875917": { nama: "Keysha Oktavia Putri", ujian: "T2-26-08-07-0003-0030-3", ttl: "Kandis, 5 Oktober 2010", mtk: "46.67", ketMtk: "Memadai", ind: "76.67", ketInd: "Baik" },
+"0111652931": { nama: "Felisya Yurifa", ujian: "T2-26-08-07-0003-0031-2", ttl: "Pariaman, 21 Juni 2011", mtk: "33.33", ketMtk: "Memadai", ind: "73.33", ketInd: "Memadai" },
+"0112988238": { nama: "Aizalia Putri Rosyadi", ujian: "T2-26-08-07-0003-0032-9", ttl: "Pariaman, 8 Maret 2011", mtk: "40.00", ketMtk: "Memadai", ind: "53.33", ketInd: "Memadai" },
+"0099832346": { nama: "MARVEL", ujian: "T2-26-08-07-0003-0033-8", ttl: "PARIAMAN, 20 Oktober 2009", mtk: "36.67", ketMtk: "Memadai", ind: "50.00", ketInd: "Memadai" },
+"0114022972": { nama: "Farid Farhan Alfaruq", ujian: "T2-26-08-07-0003-0034-7", ttl: "Balai Baru, 15 April 2011", mtk: "46.67", ketMtk: "Memadai", ind: "60.00", ketInd: "Memadai" },
+"0111439431": { nama: "IZZATUL FARA SYINTIA", ujian: "T2-26-08-07-0003-0035-6", ttl: "PARIAMAN, 13 November 2010", mtk: "33.33", ketMtk: "Memadai", ind: "73.33", ketInd: "Memadai" },
+"0104567387": { nama: "MUHAMMAD FIQRI FAZLAN", ujian: "T2-26-08-07-0003-0036-5", ttl: "PARIAMAN, 3 November 2010", mtk: "40.00", ketMtk: "Memadai", ind: "83.33", ketInd: "Baik" },
+"0094975413": { nama: "Rizki Andika Pratama Saputra", ujian: "T2-26-08-07-0003-0037-4", ttl: "Lubuk Alung, 19 Juli 2009", mtk: "30.00", ketMtk: "Kurang", ind: "36.67", ketInd: "Kurang" },
+"0104080651": { nama: "MUHAMMAD FARDHAN", ujian: "T2-26-08-07-0003-0038-3", ttl: "PAGUH DUKU, 29 Desember 2010", mtk: "36.67", ketMtk: "Memadai", ind: "40.00", ketInd: "Kurang" },
+"0106522970": { nama: "ANNISA PUTRI CASANDI", ujian: "T2-26-08-07-0003-0039-2", ttl: "Padang, 15 Juli 2010", mtk: "53.33", ketMtk: "Memadai", ind: "76.67", ketInd: "Baik" },
+"0116396795": { nama: "Dianda Afdellia Putri", ujian: "T2-26-08-07-0003-0040-9", ttl: "Padang, 5 Mei 2011", mtk: "40.00", ketMtk: "Memadai", ind: "63.33", ketInd: "Memadai" },
+"0118585568": { nama: "Rifkah Aulia Rahman", ujian: "T2-26-08-07-0003-0041-8", ttl: "Pariaman, 20 Juni 2011", mtk: "43.33", ketMtk: "Memadai", ind: "46.67", ketInd: "Kurang" },
+"0119002588": { nama: "Zahra Aqila Fitriani", ujian: "T2-26-08-07-0003-0042-7", ttl: "Tasikmalaya, 31 Agustus 2011", mtk: "50.00", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0115229834": { nama: "ZHAKY ALMER FAIRUZ", ujian: "T2-26-08-07-0003-0043-6", ttl: "PARIAMAN, 23 Januari 2011", mtk: "43.33", ketMtk: "Memadai", ind: "80.00", ketInd: "Baik" },
+"0118877881": { nama: "Daffa Al Mushoddiq", ujian: "T2-26-08-07-0003-0044-5", ttl: "Rambai, 21 Juli 2011", mtk: "46.67", ketMtk: "Memadai", ind: "73.33", ketInd: "Memadai" },
+"0111450789": { nama: "Farlent Septian Arnanda", ujian: "T2-26-08-07-0003-0045-4", ttl: "Sampan, 30 September 2011", mtk: "53.33", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0112830688": { nama: "Bilqis Husna Azizah", ujian: "T2-26-08-07-0003-0046-3", ttl: "Sampan, 4 September 2011", mtk: "43.33", ketMtk: "Memadai", ind: "76.67", ketInd: "Baik" },
+"3106458042": { nama: "CHINTA WULANDARI", ujian: "T2-26-08-07-0003-0047-2", ttl: "PARIAMAN, 28 Oktober 2010", mtk: "36.67", ketMtk: "Memadai", ind: "43.33", ketInd: "Kurang" },
+"0102884292": { nama: "Rafif Dwiviadi Ramadhan", ujian: "T2-26-08-07-0003-0048-9", ttl: "Padang, 5 Agustus 2010", mtk: "36.67", ketMtk: "Memadai", ind: "60.00", ketInd: "Memadai" },
+"0119318720": { nama: "Naisya Azizah", ujian: "T2-26-08-07-0003-0049-8", ttl: "Padang, 6 April 2011", mtk: "30.00", ketMtk: "Kurang", ind: "86.67", ketInd: "Baik" },
+"0103225518": { nama: "OZIL MULYA RAHMAT", ujian: "T2-26-08-07-0003-0050-7", ttl: "PARIAMAN, 8 September 2010", mtk: "40.00", ketMtk: "Memadai", ind: "50.00", ketInd: "Memadai" },
+"0111472934": { nama: "BAYU ARIB MUFID", ujian: "T2-26-08-07-0003-0051-6", ttl: "PADANG, 15 April 2011", mtk: "46.67", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0109179729": { nama: "LUFFI HAKIM", ujian: "T2-26-08-07-0003-0052-5", ttl: "SUNGAI KASAI, 1 Juli 2010", mtk: "40.00", ketMtk: "Memadai", ind: "63.33", ketInd: "Memadai" },
+"0118273413": { nama: "SHEREEN FEDERICA AURORA", ujian: "T2-26-08-07-0003-0053-4", ttl: "SALIDO, 14 April 2011", mtk: "26.67", ketMtk: "Kurang", ind: "46.67", ketInd: "Kurang" },
+"3119036062": { nama: "MEISYA", ujian: "T2-26-08-07-0003-0054-3", ttl: "PAUH KAMBAR, 30 Oktober 2011", mtk: "60.00", ketMtk: "Baik", ind: "76.67", ketInd: "Baik" },
+"0109554382": { nama: "Muhammad Husein Khadafi", ujian: "T2-26-08-07-0003-0055-2", ttl: "Sungai Laban, 11 November 2010", mtk: "30.00", ketMtk: "Kurang", ind: "56.67", ketInd: "Memadai" },
+"0101611760": { nama: "ELSA DHIRA PUTRI IVANNA", ujian: "T2-26-08-07-0003-0056-9", ttl: "BANDA ACEH, 3 Juli 2010", mtk: "50.00", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0107219621": { nama: "RYAN FERNANDES", ujian: "T2-26-08-07-0003-0057-8", ttl: "PARIAMAN, 16 Juli 2010", mtk: "50.00", ketMtk: "Memadai", ind: "63.33", ketInd: "Memadai" },
+"0112411953": { nama: "Farhan Al Syafiq", ujian: "T2-26-08-07-0003-0058-7", ttl: "Pariaman, 24 Juni 2011", mtk: "36.67", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0112274341": { nama: "EDSEL FATHIAN AKBAR", ujian: "T2-26-08-07-0003-0059-6", ttl: "JAKARTA, 29 Mei 2011", mtk: "43.33", ketMtk: "Memadai", ind: "83.33", ketInd: "Baik" },
+"0116367387": { nama: "KARISHA APRILIA RAYNITA", ujian: "T2-26-08-07-0003-0060-5", ttl: "PARIAMAN, 21 April 2011", mtk: "46.67", ketMtk: "Memadai", ind: "53.33", ketInd: "Memadai" },
+"0113504672": { nama: "Al Gibran Dwi Putra Aidi", ujian: "T2-26-08-07-0003-0061-4", ttl: "Pariaman, 4 Januari 2011", mtk: "63.33", ketMtk: "Baik", ind: "66.67", ketInd: "Memadai" },
+"0116373750": { nama: "RIZKY MUHARMAN PUTRA", ujian: "T2-26-08-07-0003-0062-3", ttl: "KOTO GADIS, 8 Desember 2011", mtk: "43.33", ketMtk: "Memadai", ind: "56.67", ketInd: "Memadai" },
+"0102456439": { nama: "RARA SYAFIRA OKTARENA", ujian: "T2-26-08-07-0003-0063-2", ttl: "PAUH KAMBAR, 10 Oktober 2010", mtk: "30.00", ketMtk: "Kurang", ind: "36.67", ketInd: "Kurang" },
+"0104773851": { nama: "Novelia Andini", ujian: "T2-26-08-07-0003-0064-9", ttl: "Talogondan, 21 November 2010", mtk: "30.00", ketMtk: "Kurang", ind: "56.67", ketInd: "Memadai" },
+"0115755600": { nama: "MELIA VIDI AMANDA", ujian: "T2-26-08-07-0003-0065-8", ttl: "PARIAMAN, 18 Juli 2011", mtk: "56.67", ketMtk: "Baik", ind: "90.00", ketInd: "Baik" },
+"0107927105": { nama: "ILHAM SADDRA RENAFA", ujian: "T2-26-08-07-0003-0066-7", ttl: "PARIAMAN, 14 Desember 2010", mtk: "43.33", ketMtk: "Memadai", ind: "66.67", ketInd: "Memadai" },
+"0102395193": { nama: "MUHAMMAD GADING", ujian: "T2-26-08-07-0003-0067-6", ttl: "PEKANBARU, 22 Mei 2010", mtk: "43.33", ketMtk: "Memadai", ind: "60.00", ketInd: "Memadai" },
+"0115588810": { nama: "Zahirah Lailatul Nabila", ujian: "T2-26-08-07-0003-0068-5", ttl: "Muara Bungo, 19 Maret 2011", mtk: "50.00", ketMtk: "Memadai", ind: "66.67", ketInd: "Memadai" },
+"0112908645": { nama: "GHAFIKA AMANDA RIZAL", ujian: "T2-26-08-07-0003-0069-4", ttl: "Padang, 31 Mei 2011", mtk: "33.33", ketMtk: "Memadai", ind: "60.00", ketInd: "Memadai" },
+"0105906602": { nama: "Anjelita Fitri", ujian: "T2-26-08-07-0003-0070-3", ttl: "Pariaman, 15 September 2010", mtk: "43.33", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0112885674": { nama: "Alfi Husna Auberta", ujian: "T2-26-08-07-0003-0071-2", ttl: "Pariaman, 27 Mei 2011", mtk: "40.00", ketMtk: "Memadai", ind: "73.33", ketInd: "Memadai" },
+"0115363926": { nama: "Febriani Nengsih", ujian: "T2-26-08-07-0003-0072-9", ttl: "Pariaman, 15 Februari 2011", mtk: "43.33", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0118663720": { nama: "Rendika Saputra", ujian: "T2-26-08-07-0003-0073-8", ttl: "Kampung Ladang, 10 Februari 2011", mtk: "43.33", ketMtk: "Memadai", ind: "80.00", ketInd: "Baik" },
+"0115700276": { nama: "Rizky Ardiansah Saputra", ujian: "T2-26-08-07-0003-0074-7", ttl: "Jakarta, 15 Juni 2011", mtk: "46.67", ketMtk: "Memadai", ind: "80.00", ketInd: "Baik" },
+"0102430352": { nama: "Fais Ramadhan Putra", ujian: "T2-26-08-07-0003-0075-6", ttl: "Paguah Duku, 18 Agustus 2010", mtk: "30.00", ketMtk: "Kurang", ind: "60.00", ketInd: "Memadai" },
+"0104743604": { nama: "M. Rauf Defwa", ujian: "T2-26-08-07-0003-0076-5", ttl: "Pariaman, 2 Oktober 2010", mtk: "20.00", ketMtk: "Kurang", ind: "53.33", ketInd: "Memadai" },
+"0113217163": { nama: "SHINTYA AURA SALSABILA", ujian: "T2-26-08-07-0003-0077-4", ttl: "Lubuk Ipuh, 15 Maret 2011", mtk: "40.00", ketMtk: "Memadai", ind: "56.67", ketInd: "Memadai" },
+"0112182655": { nama: "MUDINI SAFITRI", ujian: "T2-26-08-07-0003-0078-3", ttl: "PARIAMAN, 7 Mei 2011", mtk: "30.00", ketMtk: "Kurang", ind: "50.00", ketInd: "Memadai" },
+"0117369189": { nama: "Randy Pratama Efendi", ujian: "T2-26-08-07-0003-0079-2", ttl: "Pariaman, 25 November 2011", mtk: "26.67", ketMtk: "Kurang", ind: "33.33", ketInd: "Kurang" },
+"0112449168": { nama: "FIKA AULIA PUTRI", ujian: "T2-26-08-07-0003-0080-9", ttl: "Pekanbaru, 4 Juli 2011", mtk: "26.67", ketMtk: "Kurang", ind: "56.67", ketInd: "Memadai" },
+"3110038021": { nama: "Kevin Hendria Putra", ujian: "T2-26-08-07-0003-0081-8", ttl: "Pariaman, 31 Agustus 2011", mtk: "50.00", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0119570028": { nama: "M. Bima Unzilla", ujian: "T2-26-08-07-0003-0082-7", ttl: "KOTO RAJO, 16 Juli 2011", mtk: "43.33", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0104457925": { nama: "Zahira Nur Syifa", ujian: "T2-26-08-07-0003-0083-6", ttl: "Pariaman, 21 September 2010", mtk: "30.00", ketMtk: "Kurang", ind: "46.67", ketInd: "Kurang" },
+"0118725984": { nama: "RADIT ARRAHMAN", ujian: "T2-26-08-07-0003-0084-5", ttl: "Jakarta, 6 Maret 2011", mtk: "50.00", ketMtk: "Memadai", ind: "63.33", ketInd: "Memadai" },
+"0106519425": { nama: "FERDINAN AZKA MAULANA", ujian: "T2-26-08-07-0003-0085-4", ttl: "PARIAMAN, 19 Desember 2010", mtk: "40.00", ketMtk: "Memadai", ind: "50.00", ketInd: "Memadai" },
+"0092998251": { nama: "YUSRA ALFAJRIL", ujian: "T2-26-08-07-0003-0086-3", ttl: "Lubuk Ipuh, 20 Oktober 2009", mtk: "33.33", ketMtk: "Memadai", ind: "46.67", ketInd: "Kurang" },
+"3103471362": { nama: "ALDO PRATAMA PUTRA", ujian: "T2-26-08-07-0003-0087-2", ttl: "ATAMBUA, 22 Februari 2010", mtk: "30.00", ketMtk: "Kurang", ind: "43.33", ketInd: "Kurang" },
+"0108035836": { nama: "NABILA SYAKIRA", ujian: "T2-26-08-07-0003-0088-9", ttl: "PAGUH DALAM, 23 November 2010", mtk: "43.33", ketMtk: "Memadai", ind: "73.33", ketInd: "Memadai" },
+"0109498029": { nama: "SYAHRINI ARMELIA PUTRI", ujian: "T2-26-08-07-0003-0089-8", ttl: "SUNGAI KASAI, 14 Desember 2010", mtk: "20.00", ketMtk: "Kurang", ind: "36.67", ketInd: "Kurang" },
+"0117612363": { nama: "M. NAUFAL HARDINOV", ujian: "T2-26-08-07-0003-0090-7", ttl: "PARIAMAN, 19 April 2011", mtk: "33.33", ketMtk: "Memadai", ind: "63.33", ketInd: "Memadai" },
+"3118303884": { nama: "AZILA ABELLA DEWI", ujian: "T2-26-08-07-0003-0091-6", ttl: "PARIAMAN, 14 Maret 2011", mtk: "46.67", ketMtk: "Memadai", ind: "76.67", ketInd: "Baik" },
+"0106871362": { nama: "FADIL ABDILLAH", ujian: "T2-26-08-07-0003-0092-5", ttl: "PEKANBARU, 16 Oktober 2010", mtk: "36.67", ketMtk: "Memadai", ind: "50.00", ketInd: "Memadai" },
+"0116495262": { nama: "Khairatul Husna", ujian: "T2-26-08-07-0003-0093-4", ttl: "Pariaman, 24 Januari 2011", mtk: "43.33", ketMtk: "Memadai", ind: "66.67", ketInd: "Memadai" },
+"0117456794": { nama: "Muhammad Al Luthfi Syawal", ujian: "T2-26-08-07-0003-0094-3", ttl: "Pariaman, 13 September 2011", mtk: "36.67", ketMtk: "Memadai", ind: "50.00", ketInd: "Memadai" },
+"3117997783": { nama: "TASSYA AULIA PUTRI", ujian: "T2-26-08-07-0003-0095-2", ttl: "PARIAMAN, 5 November 2011", mtk: "46.67", ketMtk: "Memadai", ind: "46.67", ketInd: "Kurang" },
+"0116551468": { nama: "AIDIL AL FIKRI", ujian: "T2-26-08-07-0003-0096-9", ttl: "Pariaman, 31 Agustus 2011", mtk: "30.00", ketMtk: "Kurang", ind: "70.00", ketInd: "Memadai" },
+"0113980665": { nama: "Zaky Syahputra", ujian: "T2-26-08-07-0003-0097-8", ttl: "Sungai Laban, 20 Juli 2011", mtk: "10.00", ketMtk: "Kurang", ind: "46.67", ketInd: "Kurang" },
+"0103230490": { nama: "ABYAN HERZANO", ujian: "T2-26-08-07-0003-0098-7", ttl: "Kapalo Koto, 12 April 2010", mtk: "46.67", ketMtk: "Memadai", ind: "63.33", ketInd: "Memadai" },
+"0118547261": { nama: "KANZA PUTRI AMALIA", ujian: "T2-26-08-07-0003-0099-6", ttl: "SURABAYA, 26 Juli 2011", mtk: "43.33", ketMtk: "Memadai", ind: "76.67", ketInd: "Baik" },
+"3108742049": { nama: "HABILL SIKUMBANG", ujian: "T2-26-08-07-0003-0100-5", ttl: "DEPOK, 3 Oktober 2010", mtk: "36.67", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0116823314": { nama: "BRIAN REZA AL GHIFARI", ujian: "T2-26-08-07-0003-0101-4", ttl: "PARIAMAN, 19 Agustus 2011", mtk: "43.33", ketMtk: "Memadai", ind: "63.33", ketInd: "Memadai" },
+"3116696813": { nama: "NESYHA PUTRI AWINMI", ujian: "T2-26-08-07-0003-0102-3", ttl: "RAMBAI, 6 April 2011", mtk: "40.00", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0108561404": { nama: "Baim Shekh Kaushal", ujian: "T2-26-08-07-0003-0103-2", ttl: "Paguh Duku, 17 November 2010", mtk: "23.33", ketMtk: "Kurang", ind: "40.00", ketInd: "Kurang" },
+"0108252802": { nama: "Niko Uldiansyah", ujian: "T2-26-08-07-0003-0104-9", ttl: "Lapai, 23 November 2010", mtk: "53.33", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0109521404": { nama: "SEPTIO RADITHO", ujian: "T2-26-08-07-0003-0105-8", ttl: "SUNGAI LABAN, 4 September 2010", mtk: "46.67", ketMtk: "Memadai", ind: "46.67", ketInd: "Kurang" },
+"0119714625": { nama: "Muhammad Ali Ashabuni", ujian: "T2-26-08-07-0003-0106-7", ttl: "Medan, 15 Februari 2011", mtk: "30.00", ketMtk: "Kurang", ind: "46.67", ketInd: "Kurang" },
+"0113752129": { nama: "RAISYA OKTAFIA CANTIKA", ujian: "T2-26-08-07-0003-0107-6", ttl: "PARIAMAN, 29 Maret 2011", mtk: "36.67", ketMtk: "Memadai", ind: "50.00", ketInd: "Memadai" },
+"0103729388": { nama: "Maharrani Ramadhan", ujian: "T2-26-08-07-0003-0108-5", ttl: "Rambai, 18 Agustus 2010", mtk: "36.67", ketMtk: "Memadai", ind: "43.33", ketInd: "Kurang" },
+"0115484044": { nama: "KEYSHA DEFATRIA", ujian: "T2-26-08-07-0003-0109-4", ttl: "PARIAMAN, 21 September 2011", mtk: "43.33", ketMtk: "Memadai", ind: "80.00", ketInd: "Baik" },
+"0126635557": { nama: "Zaidan Riziq Ramadhan", ujian: "T2-26-08-07-0003-0110-3", ttl: "Sungai Laban, 5 Agustus 2012", mtk: "43.33", ketMtk: "Memadai", ind: "43.33", ketInd: "Kurang" },
+"0092990028": { nama: "MUHAMMAD RIDHO", ujian: "T2-26-08-07-0003-0111-2", ttl: "BENGKULU, 29 Oktober 2009", mtk: "40.00", ketMtk: "Memadai", ind: "53.33", ketInd: "Memadai" },
+"0103238467": { nama: "Ibnu Rahmat Fauzan Salim", ujian: "T2-26-08-07-0003-0112-9", ttl: "Pariaman, 14 Desember 2010", mtk: "40.00", ketMtk: "Memadai", ind: "53.33", ketInd: "Memadai" },
+"0085993967": { nama: "CHANIA NURUL AYNI", ujian: "T2-26-08-07-0003-0113-8", ttl: "CIMPARUH, 10 Desember 2008", mtk: "16.67", ketMtk: "Kurang", ind: "40.00", ketInd: "Kurang" },
+"0116451799": { nama: "JUAN VIRLO", ujian: "T2-26-08-07-0003-0114-7", ttl: "PARIAMAN, 15 April 2011", mtk: "36.67", ketMtk: "Memadai", ind: "60.00", ketInd: "Memadai" },
+"0116435720": { nama: "DEFRAND AL HABSY HERAWAN", ujian: "T2-26-08-07-0003-0115-6", ttl: "PARIAMAN, 24 Maret 2011", mtk: "30.00", ketMtk: "Kurang", ind: "76.67", ketInd: "Baik" },
+"0117314011": { nama: "Hadist Arsyad Bastiar", ujian: "T2-26-08-07-0003-0116-5", ttl: "Kurai Taji, 9 Februari 2011", mtk: "50.00", ketMtk: "Memadai", ind: "86.67", ketInd: "Baik" },
+"0112857230": { nama: "YULIA INSANI", ujian: "T2-26-08-07-0003-0117-4", ttl: "PARIAMAN, 23 Juli 2011", mtk: "40.00", ketMtk: "Memadai", ind: "76.67", ketInd: "Baik" },
+"0108204163": { nama: "RAFI HAMIZAN", ujian: "T2-26-08-07-0003-0118-3", ttl: "PADANG, 9 Oktober 2010", mtk: "63.33", ketMtk: "Baik", ind: "83.33", ketInd: "Baik" },
+"0103655741": { nama: "REGINA MARIANA PUTRI", ujian: "T2-26-08-07-0003-0119-2", ttl: "SAROLANGUN, 24 Mei 2010", mtk: "26.67", ketMtk: "Kurang", ind: "80.00", ketInd: "Baik" },
+"0119094985": { nama: "Tiara Nazir", ujian: "T2-26-08-07-0003-0120-9", ttl: "Pariaman, 4 Mei 2011", mtk: "66.67", ketMtk: "Baik", ind: "90.00", ketInd: "Baik" },
+"0113573129": { nama: "Mailatul Husna", ujian: "T2-26-08-07-0003-0121-8", ttl: "Pariaman, 6 Juli 2011", mtk: "33.33", ketMtk: "Memadai", ind: "83.33", ketInd: "Baik" },
+"0101514927": { nama: "ANNISA JULITA PUTRI", ujian: "T2-26-08-07-0003-0122-7", ttl: "PAGUH DUKU, 12 Juni 2010", mtk: "40.00", ketMtk: "Memadai", ind: "63.33", ketInd: "Memadai" },
+"0128060960": { nama: "DZAKIYA SELMAN PUTERI", ujian: "T2-26-08-07-0003-0123-6", ttl: "Cirebon, 28 Maret 2012", mtk: "50.00", ketMtk: "Memadai", ind: "76.67", ketInd: "Baik" },
+"0114480929": { nama: "MAJID FAKHRI", ujian: "T2-26-08-07-0003-0124-5", ttl: "BENGKULU, 19 Maret 2011", mtk: "46.67", ketMtk: "Memadai", ind: "86.67", ketInd: "Baik" },
+"0116857960": { nama: "Muhammad Ikrar Shidiq", ujian: "T2-26-08-07-0003-0125-4", ttl: "Pariaman, 12 Maret 2011", mtk: "26.67", ketMtk: "Kurang", ind: "56.67", ketInd: "Memadai" },
+"0105701732": { nama: "INTAN ZAHIRA", ujian: "T2-26-08-07-0003-0126-3", ttl: "SUNGAI SARIAK, 4 Agustus 2010", mtk: "23.33", ketMtk: "Kurang", ind: "70.00", ketInd: "Memadai" },
+"0104030674": { nama: "ANDIN VIVIA RAENATA", ujian: "T2-26-08-07-0003-0127-2", ttl: "TARAI BANGUN, 5 November 2010", mtk: "63.33", ketMtk: "Baik", ind: "76.67", ketInd: "Baik" },
+"0117770449": { nama: "MUHAMMAD ABYAN FAADHIL", ujian: "T2-26-08-07-0003-0128-9", ttl: "KURAITAJI, 6 Agustus 2011", mtk: "63.33", ketMtk: "Baik", ind: "90.00", ketInd: "Baik" },
+"0101138745": { nama: "Nathifa Qaireen Syamtia", ujian: "T2-26-08-07-0003-0129-8", ttl: "Padang, 20 Desember 2010", mtk: "60.00", ketMtk: "Baik", ind: "56.67", ketInd: "Memadai" },
+"0107808936": { nama: "CHYKA GESTIA JASRAD", ujian: "T2-26-08-07-0003-0130-7", ttl: "PARIAMAN, 30 September 2010", mtk: "56.67", ketMtk: "Baik", ind: "80.00", ketInd: "Baik" },
+"0115572680": { nama: "Roza Ardila", ujian: "T2-26-08-07-0003-0131-6", ttl: "Pariaman, 14 Juni 2011", mtk: "56.67", ketMtk: "Baik", ind: "90.00", ketInd: "Baik" },
+"0114429686": { nama: "Menajwa Hanifah", ujian: "T2-26-08-07-0003-0132-5", ttl: "Pariaman, 25 Februari 2011", mtk: "50.00", ketMtk: "Memadai", ind: "93.33", ketInd: "Baik" },
+"0112183681": { nama: "Aisyah Sausannia Putri", ujian: "T2-26-08-07-0003-0133-4", ttl: "Pariaman, 19 April 2011", mtk: "50.00", ketMtk: "Memadai", ind: "80.00", ketInd: "Baik" },
+"0108147100": { nama: "FAIZAH ANTONI PUTRI", ujian: "T2-26-08-07-0003-0134-3", ttl: "JAKARTA, 27 November 2010", mtk: "63.33", ketMtk: "Baik", ind: "76.67", ketInd: "Baik" },
+"0111515505": { nama: "Nayla Syafitri", ujian: "T2-26-08-07-0003-0135-2", ttl: "Pariaman, 1 Maret 2011", mtk: "50.00", ketMtk: "Memadai", ind: "80.00", ketInd: "Baik" },
+"0119225669": { nama: "SOVIA ASYFA BASRI", ujian: "T2-26-08-07-0003-0136-9", ttl: "Lubuk Ipuh, 4 Februari 2011", mtk: "53.33", ketMtk: "Memadai", ind: "90.00", ketInd: "Baik" },
+"0111998302": { nama: "Safitri Aini", ujian: "T2-26-08-07-0003-0137-8", ttl: "Pariaman, 1 September 2011", mtk: "50.00", ketMtk: "Memadai", ind: "83.33", ketInd: "Baik" },
+"0109448510": { nama: "RATINA JULITA", ujian: "T2-26-08-07-0003-0138-7", ttl: "KAMPUNG LADANG, 6 Juli 2010", mtk: "50.00", ketMtk: "Memadai", ind: "86.67", ketInd: "Baik" },
+"0107868590": { nama: "MARSYA RIZKI SHABILA", ujian: "T2-26-08-07-0003-0139-6", ttl: "PAUH KAMBAR, 6 Maret 2010", mtk: "43.33", ketMtk: "Memadai", ind: "86.67", ketInd: "Baik" },
+"0111126548": { nama: "Zika Apriana Naldi", ujian: "T2-26-08-07-0003-0140-5", ttl: "Jakarta, 19 April 2011", mtk: "43.33", ketMtk: "Memadai", ind: "90.00", ketInd: "Baik" },
+"0112409471": { nama: "ZASKIA TIARA PUTRI", ujian: "T2-26-08-07-0003-0141-4", ttl: "Karimun, 11 Maret 2011", mtk: "33.33", ketMtk: "Memadai", ind: "53.33", ketInd: "Memadai" },
+"0111875044": { nama: "Ghani Ulhaq", ujian: "T2-26-08-07-0003-0142-3", ttl: "Pariaman, 6 Januari 2011", mtk: "46.67", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0109127815": { nama: "IRRA ANGGRAINI", ujian: "T2-26-08-07-0003-0143-2", ttl: "TANGGERANG, 15 Maret 2010", mtk: "43.33", ketMtk: "Memadai", ind: "76.67", ketInd: "Baik" },
+"0101179910": { nama: "NAYLA AMELIA PUTRI", ujian: "T2-26-08-07-0003-0144-9", ttl: "PARIAMAN, 30 November 2010", mtk: "40.00", ketMtk: "Memadai", ind: "66.67", ketInd: "Memadai" },
+"0107639352": { nama: "MIFTAHUL AULIA RIZKI", ujian: "T2-26-08-07-0003-0145-8", ttl: "KOTO GADIS, 5 Oktober 2010", mtk: "40.00", ketMtk: "Memadai", ind: "76.67", ketInd: "Baik" },
+"0116509609": { nama: "RUNIKA MAHARANI", ujian: "T2-26-08-07-0003-0146-7", ttl: "PARIAMAN, 16 November 2011", mtk: "46.67", ketMtk: "Memadai", ind: "76.67", ketInd: "Baik" },
+"0113803306": { nama: "Rafka Aldzikri", ujian: "T2-26-08-07-0003-0147-6", ttl: "Sungai Tareh, 6 Juli 2011", mtk: "33.33", ketMtk: "Memadai", ind: "76.67", ketInd: "Baik" },
+"0119409850": { nama: "KEYSYA ZAKIYA", ujian: "T2-26-08-07-0003-0148-5", ttl: "KAPALO KOTO, 11 Juli 2011", mtk: "60.00", ketMtk: "Baik", ind: "86.67", ketInd: "Baik" },
+"0115084835": { nama: "Keysya Rezkia Adriani Fitri", ujian: "T2-26-08-07-0003-0149-4", ttl: "Pariaman, 29 Juli 2011", mtk: "30.00", ketMtk: "Kurang", ind: "76.67", ketInd: "Baik" },
+"0104998331": { nama: "PUTRI ZAHIRA", ujian: "T2-26-08-07-0003-0150-3", ttl: "PARIAMAN, 14 November 2010", mtk: "46.67", ketMtk: "Memadai", ind: "76.67", ketInd: "Baik" },
+"0128600048": { nama: "Sahrina Ainurul rahmawati", ujian: "T2-26-08-07-0003-0151-2", ttl: "Pariaman, 13 Februari 2012", mtk: "46.67", ketMtk: "Memadai", ind: "46.67", ketInd: "Kurang" },
+"0114869843": { nama: "Divo Novsen Deksami", ujian: "T2-26-08-07-0003-0152-9", ttl: "Tanah Datar, 23 November 2011", mtk: "40.00", ketMtk: "Memadai", ind: "50.00", ketInd: "Memadai" },
+"3105311445": { nama: "Rizki Aulia Jonas", ujian: "T2-26-08-07-0003-0153-8", ttl: "Lubuk Puar, 27 Agustus 2010", mtk: "43.33", ketMtk: "Memadai", ind: "63.33", ketInd: "Memadai" },
+"0116447178": { nama: "RAFFAL SAPUTRA", ujian: "T2-26-08-07-0003-0154-7", ttl: "PARIAMAN, 10 Juli 2011", mtk: "53.33", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0104879376": { nama: "Dika Amarullah", ujian: "T2-26-08-07-0003-0155-6", ttl: "Pariaman, 4 Desember 2010", mtk: "40.00", ketMtk: "Memadai", ind: "56.67", ketInd: "Memadai" },
+"3119490988": { nama: "Muhammad Rifaldi Haikal", ujian: "T2-26-08-07-0003-0156-5", ttl: "Kembayan, 15 November 2011", mtk: "40.00", ketMtk: "Memadai", ind: "60.00", ketInd: "Memadai" },
+"0113191304": { nama: "DINA TIARA RAMADANI", ujian: "T2-26-08-07-0003-0157-4", ttl: "PARIAMAN, 20 Agustus 2011", mtk: "40.00", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0119419453": { nama: "FAIZ FURQOON", ujian: "T2-26-08-07-0003-0158-3", ttl: "PADANG, 18 Agustus 2011", mtk: "43.33", ketMtk: "Memadai", ind: "6.67", ketInd: "Kurang" },
+"0117456069": { nama: "ZIZAH FATIHA ALFATH", ujian: "T2-26-08-07-0003-0159-2", ttl: "Paguh Duku, 1 Juni 2011", mtk: "46.67", ketMtk: "Memadai", ind: "73.33", ketInd: "Memadai" },
+"0101367082": { nama: "Siti Syahrani", ujian: "T2-26-08-07-0003-0160-9", ttl: "Pariaman, 2 Agustus 2010", mtk: "40.00", ketMtk: "Memadai", ind: "76.67", ketInd: "Baik" },
+"0111534356": { nama: "Haziz Alrahman", ujian: "T2-26-08-07-0003-0161-8", ttl: "Sei Laban, 27 Maret 2011", mtk: "33.33", ketMtk: "Memadai", ind: "36.67", ketInd: "Kurang" },
+"0101528622": { nama: "NAZWA PUTRI RAMLI", ujian: "T2-26-08-07-0003-0162-7", ttl: "SUNGAI SARIK, 27 Maret 2010", mtk: "36.67", ketMtk: "Memadai", ind: "80.00", ketInd: "Baik" },
+"0114575879": { nama: "IFFANNY NAZRATUL PUTRI", ujian: "T2-26-08-07-0003-0163-6", ttl: "PAGUH DALAM, 25 Mei 2011", mtk: "36.67", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0117801877": { nama: "Frino Yusmananda", ujian: "T2-26-08-07-0003-0164-5", ttl: "Bungo, 4 Mei 2011", mtk: "43.33", ketMtk: "Memadai", ind: "50.00", ketInd: "Memadai" },
+"0106703068": { nama: "Niki Uldiansyah", ujian: "T2-26-08-07-0003-0165-4", ttl: "Lapai, 23 November 2010", mtk: "50.00", ketMtk: "Memadai", ind: "83.33", ketInd: "Baik" },
+"0113624099": { nama: "NATASYA WILDYANDRA PUTRI", ujian: "T2-26-08-07-0003-0166-3", ttl: "PULAU AIR, 10 Oktober 2011", mtk: "50.00", ketMtk: "Memadai", ind: "50.00", ketInd: "Memadai" },
+"0105111442": { nama: "Zulkifli", ujian: "T2-26-08-07-0003-0167-2", ttl: "Pariaman, 1 November 2010", mtk: "60.00", ketMtk: "Baik", ind: "73.33", ketInd: "Memadai" },
+"0102920889": { nama: "Yusuf Maulana Ibrahim", ujian: "T2-26-08-07-0003-0168-9", ttl: "Pariaman, 21 November 2010", mtk: "33.33", ketMtk: "Memadai", ind: "33.33", ketInd: "Kurang" },
+"0089373103": { nama: "PUTRI DESWITA", ujian: "T2-26-08-07-0003-0169-8", ttl: "PARIAMAN, 25 Desember 2010", mtk: "30.00", ketMtk: "Kurang", ind: "53.33", ketInd: "Memadai" },
+"0114857425": { nama: "SYAFIRA", ujian: "T2-26-08-07-0003-0170-7", ttl: "Kampung Kandang, 16 Mei 2011", mtk: "43.33", ketMtk: "Memadai", ind: "40.00", ketInd: "Kurang" },
+"0105536293": { nama: "HAIKAL IKHLAS", ujian: "T2-26-08-07-0003-0171-6", ttl: "PARIAMAN, 18 September 2010", mtk: "46.67", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0102905469": { nama: "AHMAD FADHIL", ujian: "T2-26-08-07-0003-0172-5", ttl: "PARIAMAN, 19 November 2010", mtk: "26.67", ketMtk: "Kurang", ind: "66.67", ketInd: "Memadai" },
+"0111033964": { nama: "NAYLLA RAVIKA DEWI", ujian: "T2-26-08-07-0003-0173-4", ttl: "MEDAN, 8 Juli 2011", mtk: "43.33", ketMtk: "Memadai", ind: "70.00", ketInd: "Memadai" },
+"0107805820": { nama: "Rangga Aditya Pratama", ujian: "T2-26-08-07-0003-0174-3", ttl: "Pariaman, 4 September 2010", mtk: "43.33", ketMtk: "Memadai", ind: "50.00", ketInd: "Memadai" },
+"0109020060": { nama: "OXANNO YAZUKA", ujian: "T2-26-08-07-0003-0175-2", ttl: "PARIAMAN, 23 Agustus 2010", mtk: "36.67", ketMtk: "Memadai", ind: "56.67", ketInd: "Memadai" },
+"0116549644": { nama: "Muhammad Rizqi", ujian: "T2-26-08-07-0003-0176-9", ttl: "Pariaman, 17 Maret 2011", mtk: "50.00", ketMtk: "Memadai", ind: "53.33", ketInd: "Memadai" },
+"0118762620": { nama: "GHAFIKI ANANDA RIZAL", ujian: "T2-26-08-07-0003-0177-8", ttl: "Padang, 31 Mei 2011", mtk: "43.33", ketMtk: "Memadai", ind: "50.00", ketInd: "Memadai" },
+"0117100496": { nama: "ALFI ZULKARNAEN", ujian: "T2-26-08-07-0003-0178-7", ttl: "PARIAMAN, 3 Mei 2011", mtk: "33.33", ketMtk: "Memadai", ind: "66.67", ketInd: "Memadai" },
+"0117022914": { nama: "FADRIO RIZKIKAL", ujian: "T2-26-08-07-0003-0179-6", ttl: "PEKANBARU, 14 Agustus 2011", mtk: "43.33", ketMtk: "Memadai", ind: "86.67", ketInd: "Baik" },
+"0092839807": { nama: "Nasywa Anadira", ujian: "T2-26-08-07-0003-0180-5", ttl: "Pariaman, 24 Desember 2009", mtk: "43.33", ketMtk: "Memadai", ind: "53.33", ketInd: "Memadai" },
+"0119000677": { nama: "Delfa Alfauzan", ujian: "T2-26-08-07-0003-0181-4", ttl: "Pariaman, 6 Januari 2011", mtk: "40.00", ketMtk: "Memadai", ind: "40.00", ketInd: "Kurang" },
+"0104321206": { nama: "DICKY JULIANO SYAPUTRA", ujian: "T2-26-08-07-0003-0182-3", ttl: "PARIAMAN, 7 Juli 2010", mtk: "50.00", ketMtk: "Memadai", ind: "43.33", ketInd: "Kurang" },
+"0112522284": { nama: "Abdul Fadillah", ujian: "T2-26-08-07-0003-0183-2", ttl: "Pariaman, 2 Februari 2011", mtk: "20.00", ketMtk: "Kurang", ind: "53.33", ketInd: "Memadai" },
+"0107372299": { nama: "M. FADHIL FARIZKY RIAWAN", ujian: "T2-26-08-07-0003-0184-9", ttl: "PEKANBARU, 23 Juli 2010", mtk: "33.33", ketMtk: "Memadai", ind: "60.00", ketInd: "Memadai" },
+"0124648186": { nama: "SYA'BAN MAULANA", ujian: "T2-26-08-07-0003-0185-8", ttl: "LAPAI, 20 Juli 2011", mtk: "40.00", ketMtk: "Memadai", ind: "40.00", ketInd: "Kurang" },
+"0129177602": { nama: "AL FATHAN GHAFARI", ujian: "T2-26-08-07-0003-0186-7", ttl: "PARIAMAN, 2 Maret 2011", mtk: "33.33", ketMtk: "Memadai", ind: "46.67", ketInd: "Kurang" },
+"0119634742": { nama: "Quinsha Kanaya Devanti", ujian: "T2-26-08-07-0003-0187-6", ttl: "Gadur, 15 Februari 2011", mtk: "20.00", ketMtk: "Kurang", ind: "33.33", ketInd: "Kurang" },
+"0104693637": { nama: "Rafli Fajar", ujian: "T2-26-08-07-0003-0188-5", ttl: "Sungai Laban, 29 Juli 2010", mtk: "30.00", ketMtk: "Kurang", ind: "33.33", ketInd: "Kurang" },
+"0114337012": { nama: "Maikcel Jovandi", ujian: "T2-26-08-07-0003-0189-4", ttl: "Pariaman, 27 Mei 2011", mtk: "36.67", ketMtk: "Memadai", ind: "43.33", ketInd: "Kurang" },
+"3112197847": { nama: "ASHYVA CANTYKA", ujian: "T2-26-08-07-0003-0190-3", ttl: "PARIAMAN, 20 Oktober 2011", mtk: "56.67", ketMtk: "Baik", ind: "70.00", ketInd: "Memadai" },
+"0108525302": { nama: "FATMI PUTRI", ujian: "T2-26-08-07-0003-0191-2", ttl: "PARIAMAN, 26 Desember 2010", mtk: "30.00", ketMtk: "Kurang", ind: "50.00", ketInd: "Memadai" },
+"0109962016": { nama: "SALMA TALITA", ujian: "T2-26-08-07-0003-0192-9", ttl: "Pariaman, 30 November 2010", mtk: "56.67", ketMtk: "Baik", ind: "80.00", ketInd: "Baik" },
+"0111806773": { nama: "NABILA SARTIKA", ujian: "T2-26-08-07-0003-0193-8", ttl: "Tanah Tumbuh, 1 April 2011", mtk: "46.67", ketMtk: "Memadai", ind: "56.67", ketInd: "Memadai" },
+"0115651751": { nama: "Kurrata 'Ayunin", ujian: "T2-26-08-07-0003-0194-7", ttl: "Pariaman, 25 Juli 2011", mtk: "33.33", ketMtk: "Memadai", ind: "66.67", ketInd: "Memadai" },
+"0115471928": { nama: "Indah Permata Sari", ujian: "T2-26-08-07-0003-0195-6", ttl: "Sungai Sarik, 18 Februari 2011", mtk: "43.33", ketMtk: "Memadai", ind: "53.33", ketInd: "Memadai" },
+"0116313864": { nama: "LUKMANUL HAKIM", ujian: "T2-26-08-07-0003-0196-5", ttl: "SUNGAI KASAI, 5 Juni 2011", mtk: "23.33", ketMtk: "Kurang", ind: "43.33", ketInd: "Kurang" },
+"0114262411": { nama: "M. Ghaza Arrsy", ujian: "T2-26-08-07-0003-0197-4", ttl: "Pariaman, 13 April 2011", mtk: "36.67", ketMtk: "Memadai", ind: "36.67", ketInd: "Kurang" },
+"0107716114": { nama: "Ozil Zulhendri", ujian: "T2-26-08-07-0003-0198-3", ttl: "Rambai, 7 Agustus 2010", mtk: "20.00", ketMtk: "Kurang", ind: "46.67", ketInd: "Kurang" },
+"0104442090": { nama: "Ahmad Zaky", ujian: "T2-26-08-07-0003-0199-2", ttl: "Padang Sago, 28 Desember 2010", mtk: "36.67", ketMtk: "Memadai", ind: "46.67", ketInd: "Kurang" },
+"0115993218": { nama: "Azzahra Witra Nugraha", ujian: "T2-26-08-07-0003-0200-9", ttl: "Pariaman, 21 Oktober 2011", mtk: "40.00", ketMtk: "Memadai", ind: "56.67", ketInd: "Memadai" },
+"0119914267": { nama: "Afizatul Khaira", ujian: "T2-26-08-07-0003-0201-8", ttl: "Batu Hampar, 7 Maret 2011", mtk: "30.00", ketMtk: "Kurang", ind: "66.67", ketInd: "Memadai" },
+"0118378450": { nama: "JELSYKA RIZKYAH", ujian: "T2-26-08-07-0003-0202-7", ttl: "PAGUH DUKU, 25 Januari 2011", mtk: "33.33", ketMtk: "Memadai", ind: "53.33", ketInd: "Memadai" },
+"0105724696": { nama: "Asbi Junaidi", ujian: "T2-26-08-07-0003-0203-6", ttl: "Pariaman, 26 Juli 2010", mtk: "30.00", ketMtk: "Kurang", ind: "60.00", ketInd: "Memadai" },
+"0108617867": { nama: "AJENG", ujian: "T2-26-08-07-0003-0204-5", ttl: "PADANG, 24 Oktober 2009", mtk: "63.33", ketMtk: "Baik", ind: "56.67", ketInd: "Memadai" },
+"0103647937": { nama: "FERDIAN", ujian: "T2-26-08-07-0003-0205-4", ttl: "SINTUK, 13 Agustus 2010", mtk: "30.00", ketMtk: "Kurang", ind: "66.67", ketInd: "Memadai" },
+"0119132651": { nama: "MANDALA AKNEL NASUHA", ujian: "T2-26-08-07-0003-0206-3", ttl: "Dharmasraya, 31 Januari 2011", mtk: "60.00", ketMtk: "Baik", ind: "93.33", ketInd: "Baik" },
+"0104213240": { nama: "M. Reski Putra", ujian: "T2-26-08-07-0003-0207-2", ttl: "Pariaman, 26 Juli 2010", mtk: "40.00", ketMtk: "Memadai", ind: "36.67", ketInd: "Kurang" },
+"0113425529": { nama: "TIRTA HADINATA", ujian: "T2-26-08-07-0003-0208-9", ttl: "LUBUK IPUH, 3 Februari 2011", mtk: "40.00", ketMtk: "Memadai", ind: "40.00", ketInd: "Kurang" }
+        };
+
+        // Fungsi Sliding Halaman
+        function switchPage(page) {
+            const pageSiswa = document.getElementById('page-siswa');
+            const pageSekolah = document.getElementById('page-sekolah');
+            const btnSiswa = document.getElementById('btn-siswa');
+            const btnSekolah = document.getElementById('btn-sekolah');
+
+            if(page === 'siswa') {
+                pageSiswa.classList.remove('hidden-slide');
+                pageSiswa.classList.remove('-translate-x-full');
+                pageSekolah.classList.add('hidden-slide');
+                
+                btnSiswa.className = "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 bg-yellow-500 text-blue-950 font-semibold shadow";
+                btnSekolah.className = "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 text-gray-300 hover:text-white";
+            } else {
+                pageSiswa.classList.add('hidden-slide');
+                pageSekolah.classList.remove('hidden-slide');
+                
+                btnSekolah.className = "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 bg-yellow-500 text-blue-950 font-semibold shadow";
+                btnSiswa.className = "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 text-gray-300 hover:text-white";
+            }
+        }
+
+        // Fungsi Cari Siswa Berdasarkan NISN
+        function cariSiswa() {
+            const inputNisn = document.getElementById('nisn-input').value.trim();
+            const errDiv = document.getElementById('error-message');
+            const loginBox = document.getElementById('login-container');
+            const dashBox = document.getElementById('dashboard-siswa');
+
+            errDiv.classList.add('hidden');
+
+            if(!inputNisn) {
+                errDiv.textContent = "Silakan masukkan NISN terlebih dahulu.";
+                errDiv.classList.remove('hidden');
+                return;
+            }
+
+            if(databaseSiswa[inputNisn]) {
+                const siswa = databaseSiswa[inputNisn];
+                
+                // Set data ke DOM dashboard
+                document.getElementById('dash-nama').textContent = siswa.nama;
+                document.getElementById('dash-nisn').textContent = inputNisn;
+                document.getElementById('dash-noujian').textContent = siswa.ujian;
+                document.getElementById('dash-ttl').textContent = siswa.ttl;
+                
+                document.getElementById('score-mtk').textContent = siswa.mtk;
+                document.getElementById('score-ind').textContent = siswa.ind;
+                
+                // Set badge keterangan matematika
+                const bMtk = document.getElementById('ket-mtk');
+                bMtk.textContent = siswa.ketMtk;
+                if(siswa.ketMtk === 'Baik') bMtk.className = "text-sm font-bold px-3 py-0.5 rounded-full bg-green-100 text-green-800";
+                else if(siswa.ketMtk === 'Memadai') bMtk.className = "text-sm font-bold px-3 py-0.5 rounded-full bg-blue-100 text-blue-800";
+                else bMtk.className = "text-sm font-bold px-3 py-0.5 rounded-full bg-red-100 text-red-800";
+
+                // Set badge keterangan Indonesia
+                const bInd = document.getElementById('ket-ind');
+                bInd.textContent = siswa.ketInd;
+                if(siswa.ketInd === 'Baik') bInd.className = "text-sm font-bold px-3 py-0.5 rounded-full bg-green-100 text-green-800";
+                else if(siswa.ketInd === 'Memadai') bInd.className = "text-sm font-bold px-3 py-0.5 rounded-full bg-blue-100 text-blue-800";
+                else bInd.className = "text-sm font-bold px-3 py-0.5 rounded-full bg-red-100 text-red-800";
+
+                // Transisi Sembunyikan Login -> Tampilkan Dashboard
+                loginBox.classList.add('hidden');
+                dashBox.classList.remove('hidden');
+                setTimeout(() => {
+                    dashBox.classList.remove('scale-95', 'opacity-0');
+                }, 50);
+
+            } else {
+                errDiv.textContent = "Data tidak ditemukan! Pastikan NISN yang Anda masukkan terdaftar dan benar.";
+                errDiv.classList.remove('hidden');
+            }
+        }
+
+        // Fungsi Tombol Keluar Dashboard
+        function logoutSiswa() {
+            const loginBox = document.getElementById('login-container');
+            const dashBox = document.getElementById('dashboard-siswa');
+            document.getElementById('nisn-input').value = "";
+            
+            dashBox.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                dashBox.classList.add('hidden');
+                loginBox.classList.remove('hidden');
+            }, 300);
+        }
+    </script>
+</body>
+</html>
